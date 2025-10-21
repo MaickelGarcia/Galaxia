@@ -664,7 +664,7 @@
                 const scale = obj.scale * Math.max(0.5, 1 / (1 + distanceFromCamera * 0.005));
                 
                 // Mantener siempre visibles, solo variar opacidad por distancia
-                const opacity = Math.max(0.4, 1 - Math.abs(z2d) * 0.4);
+                const opacity = Math.max(0.8, 1 - Math.abs(z2d) * 0.4);
                 
                 element.style.transform = `translate(-50%, -50%) scale(${scale})`;
                 element.style.opacity = opacity;
