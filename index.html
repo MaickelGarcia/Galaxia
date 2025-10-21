@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sol con Mensajes Estelares</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background: radial-gradient(ellipse at center, #1a0a00 0%, #000000 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            touch-action: none;
+        }
+
+        .message-card {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 16px;
+            padding: 14px 20px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            pointer-events: none;
+            transform-origin: center;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3), 
+                        0 8px 32px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            white-space: nowrap;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+            letter-spacing: 0.5px;
+            transition: opacity 0.3s ease;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 14px 24px;
+            border-radius: 30px;
+            color: #fff;
+            font-size: 14px;
+            text-align: center;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 200, 100, 0.3);
+            box-shadow: 0 4px 20px rgba(255, 150, 0, 0.2);
+        }
+
+        .music-player {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(20, 20, 20, 0.9));
+            padding: 20px 30px;
+            border-radius: 50px;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 200, 100, 0.4);
+            box-shadow: 0 8px 40px rgba(255, 150, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            min-width: 300px;
+        }
+
+        .play-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF8C00, #FF6B00);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.5);
+        }
+
+        .play-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 140, 0, 0.7);
+        }
+
+        .play-button:active {
+            transform: scale(0.95);
+        }
+
+        .play-icon {
+            width: 0;
+            height: 0;
+            border-left: 15px solid white;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            margin-left: 3px;
+        }
+
+        .pause-icon {
+            display: none;
+            width: 14px;
+            height: 20px;
+            position: relative;
+        }
+
+        .pause-icon::before,
+        .pause-icon::after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 20px;
+            background: white;
+        }
+
+        .pause-icon::before {
+            left: 0;
+        }
+
+        .pause-icon::after {
+            right: 0;
+        }
+
+        .play-button.playing .play-icon {
+            display: none;
+        }
+
+        .play-button.playing .pause-icon {
+            display: block;
+        }
+
+        .music-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .music-title {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #FF8C00, #FFD700);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(255, 200, 0, 0.6);
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 4px;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .volume-icon {
+            color: #FFD700;
+            font-size: 18px;
+        }
+
+        .volume-slider {
+            width: 80px;
+            height: 6px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF8C00, #FFD700);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(255, 200, 0, 0.5);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF8C00, #FFD700);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(255, 200, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .message-card {
+                font-size: 13px;
+                padding: 10px 16px;
+            }
+            .controls {
+                font-size: 12px;
+                padding: 10px 18px;
+                top: 10px;
+            }
+            .music-player {
+                min-width: 280px;
+                padding: 15px 20px;
+                bottom: 20px;
+            }
+            .volume-control {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        ☀️ Arrastra para rotar el espacio | 🔍 Pinch/Rueda para zoom
+    </div>
+
+    <div class="music-player">
+        <button class="play-button" id="playButton">
+            <div class="play-icon"></div>
+            <div class="pause-icon"></div>
+        </button>
+        <div class="music-info">
+            <div class="music-title">🎵 Música del Cosmos</div>
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="time-display">
+                <span id="currentTime">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+        </div>
+        <div class="volume-control">
+            <span class="volume-icon">🔊</span>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // ========== CONFIGURACIÓN DE MÚSICA ==========
+        // COLOCA AQUÍ TU LINK DE DROPBOX (cambia ?dl=0 por ?raw=1 al final)
+        const MUSIC_URL = 'https://www.dropbox.com/scl/fi/stqfm7vzaeb3jhbbe8gwh/Rels-B-LOCA-LETRA.mp3?rlkey=7byu76rr2ersnitl9a5bz7wgv&st=8allaihv&dl=1';
+        
+        const audio = new Audio(MUSIC_URL);
+        const playButton = document.getElementById('playButton');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volumeSlider');
+
+        // Volumen inicial
+        audio.volume = 0.7;
+
+        // Play/Pause
+        playButton.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                playButton.classList.add('playing');
+            } else {
+                audio.pause();
+                playButton.classList.remove('playing');
+            }
+        });
+
+        // Actualizar progreso
+        audio.addEventListener('timeupdate', () => {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = progress + '%';
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+        });
+
+        // Duración total
+        audio.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(audio.duration);
+        });
+
+        // Hacer clic en la barra de progreso
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = percent * audio.duration;
+        });
+
+        // Control de volumen
+        volumeSlider.addEventListener('input', (e) => {
+            audio.volume = e.target.value / 100;
+        });
+
+        // Loop
+        audio.addEventListener('ended', () => {
+            audio.currentTime = 0;
+            audio.play();
+        });
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // ========== CONFIGURACIÓN 3D ==========
+        const canvas = document.getElementById('canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        camera.position.set(0, 0, 100);
+
+        // Tus mensajes personalizados
+        const messages = [
+            "🌟 Eres genial", "🌈 Quiero Verte", "🌻 Gracias por estar", "🌙 Mi calma",
+            "🎵 Tu energía", "💫 Brillas mucho", "🌼 Mi inspiración", "🎉 Qué bonito día",
+            "☀️ Mi Sol", "🌸 Mi motivación", "✨ Eres increíble", "🎶 Sonríe siempre",
+            "🌺 Energía bonita", "🎁 Mi apoyo", "🌟 Mi fuerza", "😊 Qué gusto verte",
+            "🌼 Siempre contigo", "💭 Buenas vibras", "🌈 Mi inspiración", "⭐ Eres especial",
+            "💐 Qué detalle", "🎯 Lo lograste", "🎊 Orgullo total", "🎨 Qué talento",
+            "🌻 Mi rayito", "☕ Momento bonito", "📖 Recuerdo lindo", "🕊️ Paz interior",
+            "🌟 Qué bonita persona", "💫 Buen corazón", "🌺 Brillas con todo", "🎵 Tu risa alegra",
+            "🧸 Qué ternura", "👑 Mi Reina", "🎀 Detalle bonito", "🎗️ Gracias por tanto",
+            "🏆 Qué grande eres", "💌 Eres luz", "🌠 Me inspiras", "⭐ Siempre fuerte",
+            "✨ Alegría pura", "🎁 Detalle especial", "🌼 Sonrisa brillante", "💖 Energía linda",
+            "🎯 Sigue brillando", "🌟 Eres magia", "🦋 Qué paz transmites", "🌷 Gratitud total",
+            "🌙 Serenidad", "🎉 Felicidad compartida", "🎵 V", "🌃 Noche tranquila",
+            "🕊️ Calma y luz", "🌟 Magia interior", "🌺 Gracias siempre", "🌟 Espíritu lindo",
+            "🔮 Buenas vibras", "🎵 Tu voz alegra", "🌍 Qué energía", "🙏 Gracias por tu apoyo",
+            "🧸 Cariño sincero", "🌟 Eres luz pura", "🌍 Mi inspiración diaria"
+        ];
+
+        // Crear grupo rotatorio
+        const rotatingGroup = new THREE.Group();
+        scene.add(rotatingGroup);
+
+        // Estrellas de fondo
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsVertices = [];
+        const starsSizes = [];
+        
+        for (let i = 0; i < 8000; i++) {
+            const x = (Math.random() - 0.5) * 500;
+            const y = (Math.random() - 0.5) * 500;
+            const z = (Math.random() - 0.5) * 500;
+            starsVertices.push(x, y, z);
+            starsSizes.push(Math.random() * 1.5 + 0.5);
+        }
+        
+        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starsVertices, 3));
+        starsGeometry.setAttribute('size', new THREE.Float32BufferAttribute(starsSizes, 1));
+        
+        const starsMaterial = new THREE.PointsMaterial({
+            color: 0xFFFFFF,
+            size: 0.8,
+            transparent: true,
+            opacity: 0.8,
+            sizeAttenuation: true
+        });
+        
+        const starField = new THREE.Points(starsGeometry, starsMaterial);
+        rotatingGroup.add(starField);
+
+        // Crear el Sol
+        const sunGeometry = new THREE.SphereGeometry(15, 128, 128);
+        
+        function createRealisticSunTexture() {
+            const size = 1024;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+            gradient.addColorStop(0, '#FFFAF0');
+            gradient.addColorStop(0.2, '#FFE4B5');
+            gradient.addColorStop(0.4, '#FFA500');
+            gradient.addColorStop(0.6, '#FF8C00');
+            gradient.addColorStop(0.8, '#FF6B00');
+            gradient.addColorStop(1, '#CC4400');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            for (let i = 0; i < 100; i++) {
+                const x = Math.random() * size;
+                const y = Math.random() * size;
+                const radius = Math.random() * 30 + 10;
+                
+                const spotGradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+                spotGradient.addColorStop(0, 'rgba(204, 68, 0, 0.7)');
+                spotGradient.addColorStop(0.5, 'rgba(255, 100, 0, 0.3)');
+                spotGradient.addColorStop(1, 'rgba(255, 100, 0, 0)');
+                
+                ctx.fillStyle = spotGradient;
+                ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+            }
+            
+            for (let i = 0; i < 50; i++) {
+                const x = Math.random() * size;
+                const y = Math.random() * size;
+                const radius = Math.random() * 15 + 5;
+                
+                const brightGradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+                brightGradient.addColorStop(0, 'rgba(255, 255, 200, 0.4)');
+                brightGradient.addColorStop(1, 'rgba(255, 255, 200, 0)');
+                
+                ctx.fillStyle = brightGradient;
+                ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
+            }
+            
+            const texture = new THREE.Texture(canvas);
+            texture.needsUpdate = true;
+            return texture;
+        }
+
+        const sunMaterial = new THREE.MeshBasicMaterial({
+            map: createRealisticSunTexture(),
+            emissive: new THREE.Color(0xFF8800),
+            emissiveIntensity: 0.7
+        });
+        
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        scene.add(sun);
+
+        // Brillo del sol
+        for (let i = 0; i < 3; i++) {
+            const glowSize = 16 + i * 2;
+            const glowGeometry = new THREE.SphereGeometry(glowSize, 64, 64);
+            const glowMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    intensity: { value: 0.8 - i * 0.2 }
+                },
+                vertexShader: `
+                    varying vec3 vNormal;
+                    void main() {
+                        vNormal = normalize(normalMatrix * normal);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform float time;
+                    uniform float intensity;
+                    varying vec3 vNormal;
+                    void main() {
+                        float glow = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.5);
+                        vec3 color = vec3(1.0, 0.6, 0.2) * glow * intensity;
+                        gl_FragColor = vec4(color, glow * 0.6);
+                    }
+                `,
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending,
+                transparent: true
+            });
+            
+            const sunGlow = new THREE.Mesh(glowGeometry, glowMaterial);
+            sunGlow.userData.glowMaterial = glowMaterial;
+            scene.add(sunGlow);
+        }
+
+        const ambientLight = new THREE.AmbientLight(0x332211, 0.3);
+        scene.add(ambientLight);
+        const sunLight = new THREE.PointLight(0xFFAA44, 3, 300);
+        scene.add(sunLight);
+
+        // Crear mensajes
+        const messageObjects = [];
+        const messageElements = [];
+
+        messages.forEach((msg, i) => {
+            const phi = Math.acos(2 * Math.random() - 1);
+            const theta = Math.random() * Math.PI * 2;
+            const radius = 35 + Math.random() * 45;
+            
+            const obj = {
+                phi: phi,
+                theta: theta,
+                radius: radius,
+                speed: 0.003, // Velocidad constante para todos
+                message: msg,
+                position: new THREE.Vector3(),
+                scale: 0.8 + Math.random() * 0.4
+            };
+            
+            messageObjects.push(obj);
+
+            const msgElement = document.createElement('div');
+            msgElement.className = 'message-card';
+            msgElement.textContent = msg;
+            msgElement.style.fontSize = (12 + obj.scale * 5) + 'px';
+            document.body.appendChild(msgElement);
+            messageElements.push(msgElement);
+        });
+
+        // Variables de control
+        let isDragging = false;
+        let previousTouch = { x: 0, y: 0 };
+        let rotation = { x: 0, y: 0 };
+        let targetRotation = { x: 0, y: 0 };
+        let velocity = { x: 0, y: 0 };
+        let initialPinchDistance = 0;
+        let currentZoom = 100;
+        let autoRotateSpeed = 0.002; // Rotación automática
+
+        // Eventos táctiles
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                previousTouch = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+                velocity = { x: 0, y: 0 };
+            } else if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
+            }
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            
+            if (e.touches.length === 1 && isDragging) {
+                const deltaX = e.touches[0].clientX - previousTouch.x;
+                const deltaY = e.touches[0].clientY - previousTouch.y;
+                
+                velocity.x = deltaX * 0.005;
+                velocity.y = deltaY * 0.005;
+                
+                targetRotation.y += velocity.x;
+                targetRotation.x += velocity.y;
+                targetRotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, targetRotation.x));
+                
+                previousTouch = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            } else if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (initialPinchDistance > 0) {
+                    const scale = distance / initialPinchDistance;
+                    currentZoom = Math.max(50, Math.min(200, currentZoom / scale));
+                    camera.position.z = currentZoom;
+                }
+                
+                initialPinchDistance = distance;
+            }
+        });
+
+        canvas.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        // Eventos mouse
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousTouch = { x: e.clientX, y: e.clientY };
+            velocity = { x: 0, y: 0 };
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - previousTouch.x;
+                const deltaY = e.clientY - previousTouch.y;
+                
+                velocity.x = deltaX * 0.005;
+                velocity.y = deltaY * 0.005;
+                
+                targetRotation.y += velocity.x;
+                targetRotation.x += velocity.y;
+                targetRotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, targetRotation.x));
+                
+                previousTouch = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            currentZoom += e.deltaY * 0.08;
+            currentZoom = Math.max(50, Math.min(200, currentZoom));
+            camera.position.z = currentZoom;
+        });
+
+        // Proyectar mensajes
+        function updateMessagePositions() {
+            messageObjects.forEach((obj, i) => {
+                obj.theta += obj.speed;
+                
+                const x = obj.radius * Math.sin(obj.phi) * Math.cos(obj.theta);
+                const y = obj.radius * Math.cos(obj.phi);
+                const z = obj.radius * Math.sin(obj.phi) * Math.sin(obj.theta);
+                
+                obj.position.set(x, y, z);
+                
+                const worldPos = obj.position.clone();
+                rotatingGroup.localToWorld(worldPos);
+                
+                const vector = worldPos.clone();
+                vector.project(camera);
+                
+                const x2d = (vector.x * 0.5 + 0.5) * window.innerWidth;
+                const y2d = ((-vector.y) * 0.5 + 0.5) * window.innerHeight;
+                const z2d = vector.z;
+                
+                const element = messageElements[i];
+                element.style.left = x2d + 'px';
+                element.style.top = y2d + 'px';
+                
+                const distanceFromCamera = worldPos.distanceTo(camera.position);
+                const scale = obj.scale * Math.max(0.5, 1 / (1 + distanceFromCamera * 0.005));
+                
+                // Mantener siempre visibles, solo variar opacidad por distancia
+                const opacity = Math.max(0.8, 1 - Math.abs(z2d) * 0.4);
+                
+                element.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                element.style.opacity = opacity;
+                element.style.zIndex = Math.floor((1 - z2d) * 1000);
+            });
+        }
+
+        // Animación
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+            
+            rotation.x += (targetRotation.x - rotation.x) * 0.08;
+            rotation.y += (targetRotation.y - rotation.y) * 0.08;
+            
+            if (!isDragging) {
+                velocity.x *= 0.96;
+                velocity.y *= 0.96;
+                targetRotation.x += velocity.y;
+                targetRotation.y += velocity.x + autoRotateSpeed;
+            }
+            
+            rotatingGroup.rotation.x = rotation.x;
+            rotatingGroup.rotation.y = rotation.y;
+            
+            sun.rotation.y += 0.0008;
+            
+            scene.children.forEach(child => {
+                if (child.userData.glowMaterial) {
+                    child.userData.glowMaterial.uniforms.time.value = time;
+                    child.rotation.y -= 0.001;
+                }
+            });
+            
+            updateMessagePositions();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
