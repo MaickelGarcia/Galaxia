@@ -26,22 +26,22 @@
 
         .message-card {
             position: absolute;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-radius: 16px;
-            padding: 14px 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            border-radius: 14px;
+            padding: 10px 16px;
             color: #fff;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
             pointer-events: none;
             transform-origin: center;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3), 
-                        0 8px 32px rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2), 
+                        0 6px 24px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             white-space: nowrap;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
-            letter-spacing: 0.5px;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+            letter-spacing: 0.3px;
             transition: opacity 0.3s ease;
         }
 
@@ -276,7 +276,7 @@
     <script>
         // ========== CONFIGURACIÓN DE MÚSICA ==========
         // COLOCA AQUÍ TU LINK DE DROPBOX (cambia ?dl=0 por ?raw=1 al final)
-        const MUSIC_URL = 'https://www.dropbox.com/scl/fi/stqfm7vzaeb3jhbbe8gwh/Rels-B-LOCA-LETRA.mp3?rlkey=7byu76rr2ersnitl9a5bz7wgv&st=8allaihv&dl=1';
+        const MUSIC_URL = 'https://www.dropbox.com/scl/fi/stqfm7vzaeb3jhbbe8gwh/Rels-B-LOCA-LETRA.mp3?rlkey=7byu76rr2ersnitl9a5bz7wgv&st=vwdst8v8&dl=1';
         
         const audio = new Audio(MUSIC_URL);
         const playButton = document.getElementById('playButton');
@@ -346,27 +346,28 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         
-        camera.position.set(0, 0, 100);
+        camera.position.set(0, 0, 120);
 
         // Tus mensajes personalizados
         const messages = [
-            "🌟 Eres genial", "🌈 Quiero Verte", "🌻 Gracias por estar", "🌙 Mi calma",
-            "🎵 Tu energía", "💫 Brillas mucho", "🌼 Mi inspiración", "🎉 Qué bonito día",
-            "☀️ Mi Sol", "🌸 Mi motivación", "✨ Eres increíble", "🎶 Sonríe siempre",
-            "🌺 Energía bonita", "🎁 Mi apoyo", "🌟 Mi fuerza", "😊 Qué gusto verte",
-            "🌼 Siempre contigo", "💭 Buenas vibras", "🌈 Mi inspiración", "⭐ Eres especial",
-            "💐 Qué detalle", "🎯 Lo lograste", "🎊 Orgullo total", "🎨 Qué talento",
-            "🌻 Mi rayito", "☕ Momento bonito", "📖 Recuerdo lindo", "🕊️ Paz interior",
-            "🌟 Qué bonita persona", "💫 Buen corazón", "🌺 Brillas con todo", "🎵 Tu risa alegra",
-            "🧸 Qué ternura", "👑 Mi Reina", "🎀 Detalle bonito", "🎗️ Gracias por tanto",
-            "🏆 Qué grande eres", "💌 Eres luz", "🌠 Me inspiras", "⭐ Siempre fuerte",
-            "✨ Alegría pura", "🎁 Detalle especial", "🌼 Sonrisa brillante", "💖 Energía linda",
-            "🎯 Sigue brillando", "🌟 Eres magia", "🦋 Qué paz transmites", "🌷 Gratitud total",
-            "🌙 Serenidad", "🎉 Felicidad compartida", "🎵 V", "🌃 Noche tranquila",
-            "🕊️ Calma y luz", "🌟 Magia interior", "🌺 Gracias siempre", "🌟 Espíritu lindo",
-            "🔮 Buenas vibras", "🎵 Tu voz alegra", "🌍 Qué energía", "🙏 Gracias por tu apoyo",
-            "🧸 Cariño sincero", "🌟 Eres luz pura", "🌍 Mi inspiración diaria"
+        "🌟 Eres genial", "🌈 Quiero Verte", "🌻 Gracias por estar", "🌙 Mi calma",
+        "🎵 Tu energía", "💫 Brillas mucho", "🌼 Mi inspiración", "🎉 Qué bonito día",
+        "☀️ Luz y alegría", "🌸 Mi motivación", "✨ Eres increíble", "🎶 Sonríe siempre",
+        "🌺 Energía bonita", "🎁 Mi apoyo", "🌟 Mi fuerza", "😊 Qué gusto verte",
+        "🌼 Siempre contigo", "💭 Buenas vibras", "🌈 Mi inspiración", "⭐ Eres especial",
+        "💐 Qué detalle", "🎯 Lo lograste", "🎊 Orgullo total", "🎨 Qué talento",
+        "🌻 Mi rayito", "☕ Momento bonito", "📖 Recuerdo lindo", "🕊️ Paz interior",
+        "🌟 Qué bonita persona", "💫 Buen corazón", "🌺 Brillas con todo", "🎵 Tu risa alegra",
+        "🧸 Qué ternura", "👑 Mi Reina", "🎀 Detalle bonito", "🎗️ Gracias por tanto",
+        "🏆 Qué grande eres", "💌 Eres luz", "🌠 Me inspiras", "⭐ Siempre fuerte",
+        "✨ Alegría pura", "🎁 Detalle especial", "🌼 Sonrisa brillante", "💖 Energía linda",
+        "🎯 Sigue brillando", "🌟 Eres magia", "🦋 Qué paz transmites", "🌷 Gratitud total",
+        "🌙 Serenidad", "🎉 Felicidad compartida", "💙 Buen amigo/a", "🌃 Noche tranquila",
+        "🕊️ Calma y luz", "🌟 Magia interior", "🌺 Gracias siempre", "🌟 Espíritu lindo",
+        "🔮 Buenas vibras", "🎵 Tu voz alegra", "🌍 Qué energía", "🙏 Gracias por tu apoyo",
+        "🧸 Cariño sincero", "🌟 Eres luz pura", "🌍 Mi inspiración diaria"
         ];
+
 
         // Crear grupo rotatorio
         const rotatingGroup = new THREE.Group();
@@ -502,23 +503,29 @@
         const sunLight = new THREE.PointLight(0xFFAA44, 3, 300);
         scene.add(sunLight);
 
-        // Crear mensajes
+        // Crear mensajes con mejor distribución
         const messageObjects = [];
         const messageElements = [];
 
         messages.forEach((msg, i) => {
-            const phi = Math.acos(2 * Math.random() - 1);
-            const theta = Math.random() * Math.PI * 2;
-            const radius = 35 + Math.random() * 45;
+            // Distribución más uniforme usando espiral de Fibonacci
+            const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5 grados
+            const phi = Math.acos(1 - 2 * (i + 0.5) / messages.length);
+            const theta = i * goldenAngle;
+            
+            // Radios más grandes y variados
+            const minRadius = 45;
+            const maxRadius = 95;
+            const radius = minRadius + (Math.random() * (maxRadius - minRadius));
             
             const obj = {
                 phi: phi,
                 theta: theta,
                 radius: radius,
-                speed: 0.003, // Velocidad constante para todos
+                speed: 0.002 + Math.random() * 0.001, // Velocidades ligeramente variadas
                 message: msg,
                 position: new THREE.Vector3(),
-                scale: 0.8 + Math.random() * 0.4
+                scale: 0.75 + Math.random() * 0.35
             };
             
             messageObjects.push(obj);
@@ -526,7 +533,7 @@
             const msgElement = document.createElement('div');
             msgElement.className = 'message-card';
             msgElement.textContent = msg;
-            msgElement.style.fontSize = (12 + obj.scale * 5) + 'px';
+            msgElement.style.fontSize = (11 + obj.scale * 4) + 'px';
             document.body.appendChild(msgElement);
             messageElements.push(msgElement);
         });
@@ -538,8 +545,8 @@
         let targetRotation = { x: 0, y: 0 };
         let velocity = { x: 0, y: 0 };
         let initialPinchDistance = 0;
-        let currentZoom = 100;
-        let autoRotateSpeed = 0.002; // Rotación automática
+        let currentZoom = 120; // Más alejado para ver mejor la distribución
+        let autoRotateSpeed = 0.0015; // Rotación más lenta y suave
 
         // Eventos táctiles
         canvas.addEventListener('touchstart', (e) => {
@@ -657,7 +664,7 @@
                 const scale = obj.scale * Math.max(0.5, 1 / (1 + distanceFromCamera * 0.005));
                 
                 // Mantener siempre visibles, solo variar opacidad por distancia
-                const opacity = Math.max(0.8, 1 - Math.abs(z2d) * 0.4);
+                const opacity = Math.max(0.4, 1 - Math.abs(z2d) * 0.4);
                 
                 element.style.transform = `translate(-50%, -50%) scale(${scale})`;
                 element.style.opacity = opacity;
